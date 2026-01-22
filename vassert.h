@@ -111,6 +111,16 @@ typedef enum {
 
 #ifdef VASSERT_IMPLEMENTATION // NOTE: you can also just provide your own
 
+
+#include <stdarg.h>
+
+
+#ifdef __ANDROID__
+#include <android/log.h>
+#ifndef VLOG_TAG
+#define VLOG_TAG "Vassert"
+#endif // VLOG_TAG
+
 static android_LogPriority level_to_prio[] = {
 	ANDROID_LOG_FATAL,
 	ANDROID_LOG_ERROR,
@@ -119,6 +129,8 @@ static android_LogPriority level_to_prio[] = {
 	ANDROID_LOG_DEBUG,
 	ANDROID_LOG_VERBOSE
 };
+#endif // __ANDROID__
+static const char *vlog_level_strings[6] = { "[FATAL]: ", "[ERROR]: ", "[WARN]: ", "[INFO]: ", "[DEBUG]: ", "[TRACE]: " };
 
 #define VLOG_MAX_MESSAGE_LEN 1024
 void vlog_msgn(VLOG_LEVEL level, const char *message, ...)
@@ -132,10 +144,10 @@ void vlog_msgn(VLOG_LEVEL level, const char *message, ...)
 	va_end(arg_ptr);
 
 #ifdef __ANDROID__
-	__android_log_print(level_to_prio[level], LOG_TAG, "%s", buffer);
+	__android_log_print(level_to_prio[level], VLOG_TAG, "%s", buffer);
 #else
 	FILE *outfile = is_error ? stderr : stdout;
-	fprintf(outfile, "%s%s\n", level_strings[level], buffer);
+	fprintf(outfile, "%s%s\n", vlog_level_strings[level], buffer);
 #endif
 }
 void vlog_failure(const char *expression, const char *message, const char *file, int32_t line, const char *func)
