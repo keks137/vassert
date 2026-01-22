@@ -111,24 +111,31 @@ typedef enum {
 
 #ifdef VASSERT_IMPLEMENTATION // NOTE: you can also just provide your own
 
+static android_LogPriority level_to_prio[] = {
+	ANDROID_LOG_FATAL,
+	ANDROID_LOG_ERROR,
+	ANDROID_LOG_WARN,
+	ANDROID_LOG_INFO,
+	ANDROID_LOG_DEBUG,
+	ANDROID_LOG_VERBOSE
+};
+
 #define VLOG_MAX_MESSAGE_LEN 1024
 void vlog_msgn(VLOG_LEVEL level, const char *message, ...)
 {
 	bool is_error = level < 2;
 	char buffer[VLOG_MAX_MESSAGE_LEN];
 
-	size_t pos = strblcpy(buffer, level_strings[level], sizeof(buffer));
-
 	va_list arg_ptr;
 	va_start(arg_ptr, message);
-	vsnprintf(buffer + pos, sizeof(buffer) - pos, message, arg_ptr);
+	vsnprintf(buffer, sizeof(buffer), message, arg_ptr);
 	va_end(arg_ptr);
 
 #ifdef __ANDROID__
 	__android_log_print(level_to_prio[level], LOG_TAG, "%s", buffer);
 #else
 	FILE *outfile = is_error ? stderr : stdout;
-	fprintf(outfile, "%s\n", buffer);
+	fprintf(outfile, "%s%s\n", level_strings[level], buffer);
 #endif
 }
 void vlog_failure(const char *expression, const char *message, const char *file, int32_t line, const char *func)
