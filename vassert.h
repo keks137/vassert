@@ -100,6 +100,9 @@ void vlog_warn(const char *expression, const char *message, const char *file, in
 	} while (0)
 #endif // NDEBUG
 
+
+#ifdef VASSERT_IMPLEMENTATION // NOTE: you can also just provide your own
+
 typedef enum {
 	VLOG_LEVEL_FATAL = 0,
 	VLOG_LEVEL_ERROR = 1,
@@ -108,9 +111,6 @@ typedef enum {
 	VLOG_LEVEL_DEBUG = 4,
 	VLOG_LEVEL_TRACE = 5,
 } VLOG_LEVEL;
-
-#ifdef VASSERT_IMPLEMENTATION // NOTE: you can also just provide your own
-
 
 #include <stdarg.h>
 
