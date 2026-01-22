@@ -112,24 +112,6 @@ typedef enum {
 #ifdef VASSERT_IMPLEMENTATION // NOTE: you can also just provide your own
 
 #define VLOG_MAX_MESSAGE_LEN 1024
-
-void vlog_failure(const char *expression, const char *message, const char *file, int32_t line, const char *func)
-{
-	if (message == NULL) {
-		log_msgn(VLOG_LEVEL_FATAL, "%s:%d: %s: Assertion '%s' failed", file, line, func, expression);
-	} else {
-		log_msgn(VLOG_LEVEL_FATAL, "%s:%d: %s: Assertion '%s' failed: '%s'", file, line, func, expression, message);
-	}
-}
-void vlog_warn(const char *expression, const char *message, const char *file, int32_t line, const char *func)
-{
-	if (message == NULL) {
-		log_msgn(VLOG_LEVEL_WARN, "%s:%d: %s: Assertion '%s' failed", file, line, func, expression);
-	} else {
-		log_msgn(VLOG_LEVEL_WARN, "%s:%d: %s: Assertion '%s' failed: '%s'", file, line, func, expression, message);
-	}
-}
-
 void vlog_msgn(VLOG_LEVEL level, const char *message, ...)
 {
 	bool is_error = level < 2;
@@ -148,6 +130,22 @@ void vlog_msgn(VLOG_LEVEL level, const char *message, ...)
 	FILE *outfile = is_error ? stderr : stdout;
 	fprintf(outfile, "%s\n", buffer);
 #endif
+}
+void vlog_failure(const char *expression, const char *message, const char *file, int32_t line, const char *func)
+{
+	if (message == NULL) {
+		vlog_msgn(VLOG_LEVEL_FATAL, "%s:%d: %s: Assertion '%s' failed", file, line, func, expression);
+	} else {
+		vlog_msgn(VLOG_LEVEL_FATAL, "%s:%d: %s: Assertion '%s' failed: '%s'", file, line, func, expression, message);
+	}
+}
+void vlog_warn(const char *expression, const char *message, const char *file, int32_t line, const char *func)
+{
+	if (message == NULL) {
+		vlog_msgn(VLOG_LEVEL_WARN, "%s:%d: %s: Assertion '%s' failed", file, line, func, expression);
+	} else {
+		vlog_msgn(VLOG_LEVEL_WARN, "%s:%d: %s: Assertion '%s' failed: '%s'", file, line, func, expression, message);
+	}
 }
 
 #endif // VASSERT_IMPLEMENTATION
