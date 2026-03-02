@@ -17,7 +17,6 @@
 #define VABORT() abort()
 #endif //VABORT_DEBUG
 
-
 // for when you want to assert in release builds
 #if defined(__GNUC__) || defined(__clang__)
 #define VLIKELY(x) __builtin_expect(!!(x), 1)
@@ -26,6 +25,37 @@
 #define VLIKELY(x) (x)
 #define VUNLIKELY(x) (x)
 #endif
+
+#ifdef _WIN32
+#ifndef VNO_WINDOWS_DEFAULTS
+#define VNO_COLORS
+#include <windows.h>
+static inline void WinMessageBox(DWORD type, const char *title, const char *prefix,
+				 const char *file, int line, const char *func,
+				 const char *fmt, ...)
+{
+	char message[4096];
+	char formatted[2048];
+
+	va_list args;
+	va_start(args, fmt);
+	vsnprintf(formatted, sizeof(formatted), fmt, args);
+	va_end(args);
+
+	snprintf(message, sizeof(message),
+		 "%s:%s:%d:%s\n\n%s",
+		 prefix, file, line, func, formatted);
+
+	MessageBoxA(NULL, message, title, type | MB_SETFOREGROUND | MB_TOPMOST);
+}
+#define VLOGHANDLER_FATAL(fmt, ...)                             \
+	WinMessageBox(MB_ICONERROR | MB_OK, "Fatal Error", "F", \
+		      __FILE__, __LINE__, __func__, fmt, ##__VA_ARGS__)
+#define VLOGHANDLER_ERROR(fmt, ...)                       \
+	WinMessageBox(MB_ICONERROR | MB_OK, "Error", "E", \
+		      __FILE__, __LINE__, __func__, fmt, ##__VA_ARGS__)
+#endif // VNO_WINDOWS_DEFAULTS
+#endif // _WIN32
 
 #ifndef VNO_COLORS
 #define VFATAL_PREFIX "\033[35m[F"
