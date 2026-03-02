@@ -34,6 +34,7 @@ void vlog_warn(const char *expression, const char *message, const char *file, in
 #define VFATAL_PREFIX "\033[35m[F:"
 #define VERROR_PREFIX "\033[31m[E:"
 #define VWARN_PREFIX "\033[33m[W:"
+#define VINFO_PREFIX "\033[36m[W:"
 #define VCODE_LOCATION "%s:%d:%s]\033[0m "
 
 #else
@@ -54,15 +55,24 @@ void vlog_warn(const char *expression, const char *message, const char *file, in
 #endif // VLOGHANDLER_FATAL
 #ifndef VLOGHANDLER_WARN
 #define VLOGHANDLER_WARN(fmt, ...) __android_log_print(ANDROID_LOG_WARN, VLOG_TAG, fmt, ##__VA_ARGS__)
-#endif // VLOG_STDOUT
+#endif // VLOGHANDLER_WARN
+#ifndef VLOGHANDLER_ERROR
+#define VLOGHANDLER_ERROR(fmt, ...) __android_log_print(ANDROID_LOG_ERROR, VLOG_TAG, fmt, ##__VA_ARGS__)
+#endif // VLOGHANDLER_ERROR
 
 #else
 #ifndef VLOGHANDLER_FATAL
 #define VLOGHANDLER_FATAL(fmt, ...) fprintf(stderr, fmt, ##__VA_ARGS__)
 #endif // VLOGHANDLER_FATAL
+#ifndef VLOGHANDLER_ERROR
+#define VLOGHANDLER_ERROR(fmt, ...) fprintf(stderr, fmt, ##__VA_ARGS__)
+#endif //VLOGHANDLER_ERROR
 #ifndef VLOGHANDLER_WARN
 #define VLOGHANDLER_WARN(fmt, ...) fprintf(stdout, fmt, ##__VA_ARGS__)
-#endif // VLOG_STDOUT
+#endif // VLOGHANDLER_WARN
+#ifndef VLOGHANDLER_INFO
+#define VLOGHANDLER_INFO(fmt, ...) fprintf(stdout, fmt, ##__VA_ARGS__)
+#endif // VLOGHANDLER_INFO
 #endif // __ANDROID__
 
 #ifndef VFATAL_LOG
@@ -86,6 +96,13 @@ void vlog_warn(const char *expression, const char *message, const char *file, in
 						       __FILE__, __LINE__, __func__, ##__VA_ARGS__)
 #endif // VWARN_LOG_MSG
 
+#ifndef VNO_LOGGING_SYSTEM
+#define VFATAL(fmt, ...) VLOGHANDLER_FATAL(VFATAL_PREFIX VCODE_LOCATION fmt "\n", __FILE__, __LINE__, __func__, ##__VA_ARGS__)
+#define VERROR(fmt, ...) VLOGHANDLER_ERROR(VERROR_PREFIX VCODE_LOCATION fmt "\n", __FILE__, __LINE__, __func__, ##__VA_ARGS__)
+#define VINFO(fmt, ...) VLOGHANDLER_INFO(VINFO_PREFIX VCODE_LOCATION fmt "\n", __FILE__, __LINE__, __func__, ##__VA_ARGS__)
+#define VWARN(fmt, ...) VLOGHANDLER_WARN(VWARN_PREFIX VCODE_LOCATION fmt "\n", __FILE__, __LINE__, __func__, ##__VA_ARGS__)
+
+#endif // VNO_LOGGING_SYSTEM
 // Asserts that can't be optimized out
 #define VENSURE(expr)                     \
 	do {                              \
