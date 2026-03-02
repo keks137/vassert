@@ -17,8 +17,6 @@
 #define VABORT() abort()
 #endif //VABORT_DEBUG
 
-void vlog_failure(const char *expression, const char *message, const char *file, int32_t line, const char *func);
-void vlog_warn(const char *expression, const char *message, const char *file, int32_t line, const char *func);
 
 // for when you want to assert in release builds
 #if defined(__GNUC__) || defined(__clang__)
