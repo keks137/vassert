@@ -1,3 +1,5 @@
+// #define VNO_COLORS
+// #define VNO_LOCATED_LOGS
 #include "vassert.h"
 int main()
 {

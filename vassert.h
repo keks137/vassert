@@ -2,8 +2,6 @@
 #define INCLUDE_SRC_ASSERTS_H_
 
 #include <stdint.h>
-#include <stdlib.h>
-#include <stdio.h>
 
 #ifdef VABORT_DEBUG
 #if _MSC_VER
@@ -15,6 +13,7 @@
 
 #else
 
+#include <stdlib.h>
 #define VABORT() abort()
 #endif //VABORT_DEBUG
 
@@ -31,17 +30,20 @@ void vlog_warn(const char *expression, const char *message, const char *file, in
 #endif
 
 #ifndef VNO_COLORS
-#define VFATAL_PREFIX "\033[35m[F:"
-#define VERROR_PREFIX "\033[31m[E:"
-#define VWARN_PREFIX "\033[33m[W:"
-#define VINFO_PREFIX "\033[36m[W:"
-#define VCODE_LOCATION "%s:%d:%s]\033[0m "
+#define VFATAL_PREFIX "\033[35m[F"
+#define VERROR_PREFIX "\033[31m[E"
+#define VWARN_PREFIX "\033[33m[W"
+#define VINFO_PREFIX "\033[36m[I"
+#define VCODE_LOCATION ":%s:%d:%s]"
+#define VCOLOR_TERMINATION "\033[0m "
 
 #else
-#define VFATAL_PREFIX "[F:"
-#define VWARN_PREFIX "[W:"
-#define VERROR_PREFIX "[E:"
-#define VCODE_LOCATION "%s:%d:%s] "
+#define VFATAL_PREFIX "[F"
+#define VWARN_PREFIX "[W"
+#define VERROR_PREFIX "[E"
+#define VINFO_PREFIX "[I"
+#define VCODE_LOCATION ":%s:%d:%s] "
+#define VCOLOR_TERMINATION " "
 #endif // VNO_COLORS
 
 #ifdef __ANDROID__
@@ -61,6 +63,7 @@ void vlog_warn(const char *expression, const char *message, const char *file, in
 #endif // VLOGHANDLER_ERROR
 
 #else
+#include <stdio.h>
 #ifndef VLOGHANDLER_FATAL
 #define VLOGHANDLER_FATAL(fmt, ...) fprintf(stderr, fmt, ##__VA_ARGS__)
 #endif // VLOGHANDLER_FATAL
@@ -76,31 +79,39 @@ void vlog_warn(const char *expression, const char *message, const char *file, in
 #endif // __ANDROID__
 
 #ifndef VFATAL_LOG
-#define VFATAL_LOG(expr) VLOGHANDLER_FATAL(VFATAL_PREFIX VCODE_LOCATION "Assertion failed: '" #expr "'" \
-									"\n",                           \
+#define VFATAL_LOG(expr) VLOGHANDLER_FATAL(VFATAL_PREFIX VCODE_LOCATION VCOLOR_TERMINATION "Assertion failed: '" #expr "'" \
+											   "\n",                           \
 					   __FILE__, __LINE__, __func__)
 #endif // VFATAL_LOG
 #ifndef VFATAL_LOG_MSG
-#define VFATAL_LOG_MSG(expr, fmt, ...) VLOGHANDLER_FATAL(VFATAL_PREFIX VCODE_LOCATION "Assertion failed: '" #expr "' '" fmt "'\n", \
+#define VFATAL_LOG_MSG(expr, fmt, ...) VLOGHANDLER_FATAL(VFATAL_PREFIX VCODE_LOCATION VCOLOR_TERMINATION "Assertion failed: '" #expr "' '" fmt "'\n", \
 							 __FILE__, __LINE__, __func__, ##__VA_ARGS__)
 
 #endif // VFATAL_LOG_MSG
 #ifndef VWARN_LOG
-#define VWARN_LOG(expr) VLOGHANDLER_WARN(VWARN_PREFIX VCODE_LOCATION "Assertion failed: '" #expr "'" \
-								     "\n",                           \
+#define VWARN_LOG(expr) VLOGHANDLER_WARN(VWARN_PREFIX VCODE_LOCATION VCOLOR_TERMINATION "Assertion failed: '" #expr "'" \
+											"\n",                           \
 					 __FILE__, __LINE__, __func__)
 #endif // VWARN_LOG
 
 #ifndef VWARN_LOG_MSG
-#define VWARN_LOG_MSG(expr, fmt, ...) VLOGHANDLER_WARN(VWARN_PREFIX VCODE_LOCATION "Assertion failed: '" #expr "' '" fmt "'\n", \
+#define VWARN_LOG_MSG(expr, fmt, ...) VLOGHANDLER_WARN(VWARN_PREFIX VCODE_LOCATION VCOLOR_TERMINATION "Assertion failed: '" #expr "' '" fmt "'\n", \
 						       __FILE__, __LINE__, __func__, ##__VA_ARGS__)
 #endif // VWARN_LOG_MSG
 
 #ifndef VNO_LOGGING_SYSTEM
-#define VFATAL(fmt, ...) VLOGHANDLER_FATAL(VFATAL_PREFIX VCODE_LOCATION fmt "\n", __FILE__, __LINE__, __func__, ##__VA_ARGS__)
-#define VERROR(fmt, ...) VLOGHANDLER_ERROR(VERROR_PREFIX VCODE_LOCATION fmt "\n", __FILE__, __LINE__, __func__, ##__VA_ARGS__)
-#define VINFO(fmt, ...) VLOGHANDLER_INFO(VINFO_PREFIX VCODE_LOCATION fmt "\n", __FILE__, __LINE__, __func__, ##__VA_ARGS__)
-#define VWARN(fmt, ...) VLOGHANDLER_WARN(VWARN_PREFIX VCODE_LOCATION fmt "\n", __FILE__, __LINE__, __func__, ##__VA_ARGS__)
+
+#ifdef VNO_LOCATED_LOGS
+#define VFATAL(fmt, ...) VLOGHANDLER_FATAL(VFATAL_PREFIX "]" VCOLOR_TERMINATION fmt "\n", ##__VA_ARGS__)
+#define VERROR(fmt, ...) VLOGHANDLER_ERROR(VERROR_PREFIX "]" VCOLOR_TERMINATION fmt "\n", ##__VA_ARGS__)
+#define VINFO(fmt, ...) VLOGHANDLER_INFO(VINFO_PREFIX "]" VCOLOR_TERMINATION fmt "\n", ##__VA_ARGS__)
+#define VWARN(fmt, ...) VLOGHANDLER_WARN(VWARN_PREFIX "]" VCOLOR_TERMINATION fmt "\n", ##__VA_ARGS__)
+#else
+#define VFATAL(fmt, ...) VLOGHANDLER_FATAL(VFATAL_PREFIX VCODE_LOCATION VCOLOR_TERMINATION fmt "\n", __FILE__, __LINE__, __func__, ##__VA_ARGS__)
+#define VERROR(fmt, ...) VLOGHANDLER_ERROR(VERROR_PREFIX VCODE_LOCATION VCOLOR_TERMINATION fmt "\n", __FILE__, __LINE__, __func__, ##__VA_ARGS__)
+#define VINFO(fmt, ...) VLOGHANDLER_INFO(VINFO_PREFIX VCODE_LOCATION VCOLOR_TERMINATION fmt "\n", __FILE__, __LINE__, __func__, ##__VA_ARGS__)
+#define VWARN(fmt, ...) VLOGHANDLER_WARN(VWARN_PREFIX VCODE_LOCATION VCOLOR_TERMINATION fmt "\n", __FILE__, __LINE__, __func__, ##__VA_ARGS__)
+#endif // VNO_LOCATED_LOGS
 
 #endif // VNO_LOGGING_SYSTEM
 // Asserts that can't be optimized out
