@@ -30,7 +30,7 @@
 #ifndef VNO_WINDOWS_DEFAULTS
 #define VNO_COLORS
 #include <windows.h>
-static inline void WinMessageBox(DWORD type, const char *title, const char *prefix,
+static inline void VWinMessageBox(DWORD type, const char *title, const char *prefix,
 				 const char *file, int line, const char *func,
 				 const char *fmt, ...)
 {
@@ -49,10 +49,10 @@ static inline void WinMessageBox(DWORD type, const char *title, const char *pref
 	MessageBoxA(NULL, message, title, type | MB_SETFOREGROUND | MB_TOPMOST);
 }
 #define VLOGHANDLER_FATAL(fmt, ...)                             \
-	WinMessageBox(MB_ICONERROR | MB_OK, "Fatal Error", "F", \
+	VWinMessageBox(MB_ICONERROR | MB_OK, "Fatal Error", "F", \
 		      __FILE__, __LINE__, __func__, fmt, ##__VA_ARGS__)
 #define VLOGHANDLER_ERROR(fmt, ...)                       \
-	WinMessageBox(MB_ICONERROR | MB_OK, "Error", "E", \
+	VWinMessageBox(MB_ICONERROR | MB_OK, "Error", "E", \
 		      __FILE__, __LINE__, __func__, fmt, ##__VA_ARGS__)
 #endif // VNO_WINDOWS_DEFAULTS
 #endif // _WIN32
