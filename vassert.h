@@ -2,6 +2,7 @@
 #define INCLUDE_SRC_ASSERTS_H_
 
 #include <stdint.h>
+#include <stdbool.h>
 
 #ifdef VABORT_DEBUG
 #if _MSC_VER
@@ -31,8 +32,8 @@
 #define VNO_COLORS
 #include <windows.h>
 static inline void VWinMessageBox(DWORD type, const char *title, const char *prefix,
-				 const char *file, int line, const char *func,
-				 const char *fmt, ...)
+				  const char *file, int line, const char *func,
+				  const char *fmt, ...)
 {
 	char message[4096];
 	char formatted[2048];
@@ -48,12 +49,12 @@ static inline void VWinMessageBox(DWORD type, const char *title, const char *pre
 
 	MessageBoxA(NULL, message, title, type | MB_SETFOREGROUND | MB_TOPMOST);
 }
-#define VLOGHANDLER_FATAL(fmt, ...)                             \
+#define VLOGHANDLER_FATAL(fmt, ...)                              \
 	VWinMessageBox(MB_ICONERROR | MB_OK, "Fatal Error", "F", \
-		      __FILE__, __LINE__, __func__, fmt, ##__VA_ARGS__)
-#define VLOGHANDLER_ERROR(fmt, ...)                       \
+		       __FILE__, __LINE__, __func__, fmt, ##__VA_ARGS__)
+#define VLOGHANDLER_ERROR(fmt, ...)                        \
 	VWinMessageBox(MB_ICONERROR | MB_OK, "Error", "E", \
-		      __FILE__, __LINE__, __func__, fmt, ##__VA_ARGS__)
+		       __FILE__, __LINE__, __func__, fmt, ##__VA_ARGS__)
 #endif // VNO_WINDOWS_DEFAULTS
 #endif // _WIN32
 
@@ -175,6 +176,8 @@ static inline void VWinMessageBox(DWORD type, const char *title, const char *pre
 		}                                                 \
 	} while (0)
 
+#define VALWAYS(expr) true
+#define VNEVER(expr) false
 #else
 #define VASSERT(expr) ((void)0)
 #define VASSERT_MSG(expr, msg) ((void)0)
