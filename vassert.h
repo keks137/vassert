@@ -176,15 +176,43 @@ static inline void VWinMessageBox(DWORD type, const char *title, const char *pre
 		}                                                 \
 	} while (0)
 
-#define VALWAYS(expr) true
-#define VNEVER(expr) false
+static inline int _vassert_always_impl(int cond, int expected,
+				       const char *file, int line,
+				       const char *func, const char *expr_str)
+{
+	if (cond == expected) {
+		return cond;
+	}
+
+#ifdef VNO_LOCATED_LOGS
+	VLOGHANDLER_FATAL(VFATAL_PREFIX "]" VCOLOR_TERMINATION
+					"%s failed: '%s'\n",
+			  expected ? "VALWAYS" : "VNEVER",
+			  expr_str);
+#else
+	VLOGHANDLER_FATAL(VFATAL_PREFIX VCODE_LOCATION VCOLOR_TERMINATION
+			  "%s failed: '%s'\n",
+			  file, line, func,
+			  expected ? "VALWAYS" : "VNEVER",
+			  expr_str);
+#endif
+	VABORT();
+	return 0; // unreachable
+}
+
+#define VALWAYS(expr) VLIKELY(!!_vassert_always_impl((expr), 1, \
+						     __FILE__, __LINE__, __func__, #expr))
+#define VNEVER(expr) VUNLIKELY(!_vassert_always_impl((expr), 0, \
+						     __FILE__, __LINE__, __func__, "!(" #expr ")"))
 #else
 #define VASSERT(expr) ((void)0)
-#define VASSERT_MSG(expr, msg) ((void)0)
+#define VASSERT_MSG(expr, msg, ...) ((void)0)
 #define VASSERT_WARN(expr) ((void)0)
-#define VASSERT_WARN_MSG(expr, msg) ((void)0)
-#define VALWAYS(expr) expr
-#define VNEVER(expr) expr
+#define VASSERT_WARN_MSG(expr, msg, ...) ((void)0)
+
+// NOTE: unsure if these should just be true and false for compiler optimization or the expression itself for safety
+#define VALWAYS(expr) VLIKELY(expr)
+#define VNEVER(expr) VUNLIKELY(expr)
 
 #endif //NDEBUG
 
