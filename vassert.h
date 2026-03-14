@@ -90,6 +90,9 @@ static inline void VWinMessageBox(DWORD type, const char *title, const char *pre
 #ifndef VLOGHANDLER_ERROR
 #define VLOGHANDLER_ERROR(fmt, ...) __android_log_print(ANDROID_LOG_ERROR, VLOG_TAG, fmt, ##__VA_ARGS__)
 #endif // VLOGHANDLER_ERROR
+#ifndef VLOGHANDLER_INFO
+#define VLOGHANDLER_INFO(fmt, ...) __android_log_print(ANDROID_LOG_INFO, VLOG_TAG, fmt, ##__VA_ARGS__)
+#endif // VLOGHANDLER_INFO
 
 #else
 #include <stdio.h>
