@@ -110,25 +110,30 @@ static inline void VWinMessageBox(DWORD type, const char *title, const char *pre
 #endif // VLOGHANDLER_INFO
 #endif // __ANDROID__
 
-#ifndef VFATAL_LOG
-#define VFATAL_LOG(expr) VLOGHANDLER_FATAL(VFATAL_PREFIX VCODE_LOCATION VCOLOR_TERMINATION "Assertion failed: '" #expr "'" \
-											   "\n",                           \
-					   __FILE__, __LINE__, __func__)
+#ifndef VFATAL_ALOG
+#define VFATAL_ALOG(expr) VLOGHANDLER_FATAL(VFATAL_PREFIX VCODE_LOCATION VCOLOR_TERMINATION "Assertion failed: '" #expr "'" \
+											    "\n",                           \
+					    __FILE__, __LINE__, __func__)
 #endif // VFATAL_LOG
-#ifndef VFATAL_LOG_MSG
-#define VFATAL_LOG_MSG(expr, fmt, ...) VLOGHANDLER_FATAL(VFATAL_PREFIX VCODE_LOCATION VCOLOR_TERMINATION "Assertion failed: '" #expr "' '" fmt "'\n", \
-							 __FILE__, __LINE__, __func__, ##__VA_ARGS__)
+#ifndef VFATAL_ALOG_MSG
+#define VFATAL_ALOG_MSG(expr, fmt, ...) VLOGHANDLER_FATAL(VFATAL_PREFIX VCODE_LOCATION VCOLOR_TERMINATION "Assertion failed: '" #expr "' '" fmt "'\n", \
+							  __FILE__, __LINE__, __func__, ##__VA_ARGS__)
 
 #endif // VFATAL_LOG_MSG
-#ifndef VWARN_LOG
-#define VWARN_LOG(expr) VLOGHANDLER_WARN(VWARN_PREFIX VCODE_LOCATION VCOLOR_TERMINATION "Assertion failed: '" #expr "'" \
-											"\n",                           \
-					 __FILE__, __LINE__, __func__)
+#ifndef VFATAL_PLOG
+#define VFATAL_PLOG(fmt, ...) VLOGHANDLER_FATAL(VFATAL_PREFIX VCODE_LOCATION VCOLOR_TERMINATION "Panic: '" fmt "'\n", \
+						    __FILE__, __LINE__, __func__, ##__VA_ARGS__)
+
+#endif // VFATAL_PLOG
+#ifndef VWARN_ALOG
+#define VWARN_ALOG(expr) VLOGHANDLER_WARN(VWARN_PREFIX VCODE_LOCATION VCOLOR_TERMINATION "Assertion failed: '" #expr "'" \
+											 "\n",                           \
+					  __FILE__, __LINE__, __func__)
 #endif // VWARN_LOG
 
-#ifndef VWARN_LOG_MSG
-#define VWARN_LOG_MSG(expr, fmt, ...) VLOGHANDLER_WARN(VWARN_PREFIX VCODE_LOCATION VCOLOR_TERMINATION "Assertion failed: '" #expr "' '" fmt "'\n", \
-						       __FILE__, __LINE__, __func__, ##__VA_ARGS__)
+#ifndef VWARN_ALOG_MSG
+#define VWARN_ALOG_MSG(expr, fmt, ...) VLOGHANDLER_WARN(VWARN_PREFIX VCODE_LOCATION VCOLOR_TERMINATION "Assertion failed: '" #expr "' '" fmt "'\n", \
+							__FILE__, __LINE__, __func__, ##__VA_ARGS__)
 #endif // VWARN_LOG_MSG
 
 #ifndef VNO_LOGGING_SYSTEM
@@ -147,20 +152,25 @@ static inline void VWinMessageBox(DWORD type, const char *title, const char *pre
 
 #endif // VNO_LOGGING_SYSTEM
 // Asserts that can't be optimized out
-#define VENSURE(expr)                     \
-	do {                              \
-		if (VUNLIKELY(!(expr))) { \
-			VFATAL_LOG(expr); \
-			VABORT();         \
-		}                         \
+#define VENSURE(expr)                      \
+	do {                               \
+		if (VUNLIKELY(!(expr))) {  \
+			VFATAL_ALOG(expr); \
+			VABORT();          \
+		}                          \
 	} while (0)
 
-#define VENSURE_MSG(expr, msg, ...)                                \
-	do {                                                       \
-		if (VUNLIKELY(!(expr))) {                          \
-			VFATAL_LOG_MSG(#expr, msg, ##__VA_ARGS__); \
-			VABORT();                                  \
-		}                                                  \
+#define VENSURE_MSG(expr, msg, ...)                                 \
+	do {                                                        \
+		if (VUNLIKELY(!(expr))) {                           \
+			VFATAL_ALOG_MSG(#expr, msg, ##__VA_ARGS__); \
+			VABORT();                                   \
+		}                                                   \
+	} while (0)
+#define VPANIC(msg, ...)                         \
+	do {                                     \
+		VFATAL_PLOG(msg, ##__VA_ARGS__); \
+		VABORT();                        \
 	} while (0)
 
 #ifndef NDEBUG
@@ -169,14 +179,14 @@ static inline void VWinMessageBox(DWORD type, const char *title, const char *pre
 #define VASSERT_WARN(expr)                \
 	do {                              \
 		if (VUNLIKELY(!(expr))) { \
-			VWARN_LOG(expr);  \
+			VWARN_ALOG(expr); \
 		}                         \
 	} while (0)
-#define VASSERT_WARN_MSG(expr, msg, ...)                          \
-	do {                                                      \
-		if (VUNLIKELY(!(expr))) {                         \
-			VWARN_LOG_MSG(#expr, msg, ##__VA_ARGS__); \
-		}                                                 \
+#define VASSERT_WARN_MSG(expr, msg, ...)                           \
+	do {                                                       \
+		if (VUNLIKELY(!(expr))) {                          \
+			VWARN_ALOG_MSG(#expr, msg, ##__VA_ARGS__); \
+		}                                                  \
 	} while (0)
 
 static inline int _vassert_always_impl(int cond, int expected,
